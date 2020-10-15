@@ -23,7 +23,7 @@ app.get("/allmovies", async (req, res) => {
       GROUP BY m.movie_id;
       `
     );
-    // console.log(allMovie.rows[0].producer_id);
+    // console.log(allMovie.rows);
     res.json(allMovie.rows);
   } catch (err) {
     console.error(err.message);
@@ -41,7 +41,7 @@ app.get("/allactors", async (req, res) => {
   }
 });
 
-// get all actors
+// get all producers
 
 app.get("/allproducer", async (req, res) => {
   try {
