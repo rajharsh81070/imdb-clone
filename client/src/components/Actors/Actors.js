@@ -25,7 +25,7 @@ class Actors extends Component {
 };
 
 const mapStateToProps = state => ({
-  actors: state.movies.actors,
+  actors: state.data.actors,
   // newActor: state.actors.item
 });
 

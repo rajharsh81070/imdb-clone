@@ -9,12 +9,6 @@ class Movies extends Component {
     this.props.fetchMovies();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.newMovie) {
-      this.props.movies.unshift(nextProps.newMovie);
-    }
-  }
-
   render() {
     // const postItems = this.props.posts.map(post => (
     //   <div key={post.id}>
@@ -44,8 +38,7 @@ class Movies extends Component {
 }
 
 const mapStateToProps = state => ({
-  movies: state.movies.movies,
-  newMovie: state.movies.item
+  movies: state.data.movies,
 });
 
 export default connect(mapStateToProps, { fetchMovies })(Movies);

@@ -25,7 +25,7 @@ class Producers extends Component {
 };
 
 const mapStateToProps = state => ({
-  producers: state.movies.producers,
+  producers: state.data.producers,
   // newActor: state.actors.item
 });
 

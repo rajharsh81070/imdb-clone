@@ -59,7 +59,7 @@ export const fetchProducers = () => dispatch => {
     });
 };
 
-export const createPost = postData => dispatch => {
+export const manageMovie = postData => dispatch => {
   const requestOptions = {
     method: 'POST',
     mode: 'cors',
@@ -69,12 +69,12 @@ export const createPost = postData => dispatch => {
     },
     body: JSON.stringify(postData)
   };
-  fetch('https://jsonplaceholder.typicode.com/posts', requestOptions)
+  fetch('http://localhost:5000/addmovie', requestOptions)
     .then(res => res.json())
-    .then(post =>
+    .then(movies =>
       dispatch({
-        type: NEW_MOVIE,
-        payload: post
+        type: FETCH_MOVIES,
+        payload: movies
       })
     );
 };

@@ -10,11 +10,6 @@ export default function (state = initialState, action) {
         ...state,
         movies: action.payload
       };
-    case NEW_MOVIE:
-      return {
-        ...state,
-        item: action.payload
-      };
     case FETCH_ACTORS:
       return {
         ...state,

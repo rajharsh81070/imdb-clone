@@ -65,7 +65,17 @@ app.post("/addmovie", async (req, res) => {
       "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
       [actor_id, newMovie.rows[0].movie_id]
     )
-    res.json(newMovie.rows[0]);
+    const allMovies = await pool.query(
+      `
+      select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+      as actors from movie m
+      join actor_movie ma on (m.movie_id = ma.movie_id) 
+      join actor a on (ma.actor_id = a.actor_id) 
+      join producer p on (m.producer_id = p.producer_id) 
+      GROUP BY m.movie_id;
+      `
+    );
+    res.json(allMovies.rows);
   } catch (err) {
     console.error(err.message);
   }
