@@ -13,7 +13,17 @@ app.use(express.json()); //req.body
 
 app.get("/allmovies", async (req, res) => {
   try {
-    const allMovie = await pool.query("SELECT * FROM movie");
+    const allMovie = await pool.query(
+      `
+      select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+      as actors from movie m
+      join actor_movie ma on (m.movie_id = ma.movie_id) 
+      join actor a on (ma.actor_id = a.actor_id) 
+      join producer p on (m.producer_id = p.producer_id) 
+      GROUP BY m.movie_id;
+      `
+    );
+    // console.log(allMovie.rows[0].producer_id);
     res.json(allMovie.rows);
   } catch (err) {
     console.error(err.message);
@@ -46,13 +56,16 @@ app.get("/allproducer", async (req, res) => {
 
 app.post("/addmovie", async (req, res) => {
   try {
-    const { movie_name, producer_id } = req.body;
-    const newTodo = await pool.query(
+    const { movie_name, producer_id, actor_id } = req.body;
+    const newMovie = await pool.query(
       "INSERT INTO movie (movie_name, producer_id) VALUES($1, $2) RETURNING *",
       [movie_name, producer_id]
     );
-
-    res.json(newTodo.rows[0]);
+    const newRelation = await pool.query(
+      "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
+      [actor_id, newMovie.rows[0].movie_id]
+    )
+    res.json(newMovie.rows[0]);
   } catch (err) {
     console.error(err.message);
   }
@@ -105,13 +118,13 @@ app.post("/addproducer", async (req, res) => {
 //   }
 // });
 
-//update a todo
+//update a movie
 
 // app.put("/todos/:id", async (req, res) => {
 //   try {
 //     const { id } = req.params;
 //     const { description } = req.body;
-//     const updateTodo = await pool.query(
+//     const updateMovie = await pool.query(
 //       "UPDATE todo SET description = $1 WHERE todo_id = $2",
 //       [description, id]
 //     );
