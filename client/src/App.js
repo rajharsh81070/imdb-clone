@@ -8,11 +8,13 @@ import NotFound from './components/NotFound';
 import ManageMoviePage from './components/ManageMoviePage';
 import Actors from './components/Actors/Actors';
 import Producers from './components/Producers/Producers';
+import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <div className="container">
-      {/* <ToastContainer autoClose={3000} hideProgressBar /> */}
+      <ToastContainer autoClose={3000} />
       <Header />
       <Switch>
         <Route path="/" exact component={Home} />

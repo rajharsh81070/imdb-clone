@@ -56,26 +56,35 @@ app.get("/allproducer", async (req, res) => {
 
 app.post("/addmovie", async (req, res) => {
   try {
-    const { movie_name, producer_id, actor_id } = req.body;
+    const { movie_name, producer_id, actors_id } = req.body;
     const newMovie = await pool.query(
       "INSERT INTO movie (movie_name, producer_id) VALUES($1, $2) RETURNING *",
       [movie_name, producer_id]
     );
-    const newRelation = await pool.query(
-      "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
-      [actor_id, newMovie.rows[0].movie_id]
-    )
-    const allMovies = await pool.query(
-      `
-      select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
-      as actors from movie m
-      join actor_movie ma on (m.movie_id = ma.movie_id) 
-      join actor a on (ma.actor_id = a.actor_id) 
-      join producer p on (m.producer_id = p.producer_id) 
-      GROUP BY m.movie_id;
-      `
-    );
-    res.json(allMovies.rows);
+    await actors_id.forEach(actor_id => {
+      // console.log(actor_id);
+      const newRelation = pool.query(
+        "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
+        [actor_id, newMovie.rows[0].movie_id]
+      )
+    });
+    // const newRelation = await pool.query(
+    //   "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
+    //   [actor_id, newMovie.rows[0].movie_id]
+    // )
+    // const allMovies = await pool.query(
+    //   `
+    //   select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+    //   as actors from movie m
+    //   join actor_movie ma on (m.movie_id = ma.movie_id) 
+    //   join actor a on (ma.actor_id = a.actor_id) 
+    //   join producer p on (m.producer_id = p.producer_id) 
+    //   GROUP BY m.movie_id;
+    //   `
+    // );
+    res.json({
+      "message": "Movie Successfully Created"
+    });
   } catch (err) {
     console.error(err.message);
   }
@@ -91,7 +100,9 @@ app.post("/addactor", async (req, res) => {
       [actor_name]
     );
 
-    res.json(newActor.rows[0]);
+    res.json({
+      "message": "Actor Successfully Created"
+    });
   } catch (err) {
     console.error(err.message);
   }
@@ -107,7 +118,9 @@ app.post("/addproducer", async (req, res) => {
       [producer_name]
     );
 
-    res.json(newProducer.rows[0]);
+    res.json({
+      "message": "Producer Successfully Created"
+    });
   } catch (err) {
     console.error(err.message);
   }

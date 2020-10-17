@@ -10,13 +10,8 @@ class Movies extends Component {
   }
 
   render() {
-    // const postItems = this.props.posts.map(post => (
-    //   <div key={post.id}>
-    //     <h3>{post.title}</h3>
-    //     <p>{post.body}</p>
-    //   </div>
-    // ));
-    const movies = this.props.movies;
+
+    const { movies } = this.props;
     return (
       <div className='page-header'>
         <div className='btn-toolbar float-right'>
