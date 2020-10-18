@@ -4,7 +4,9 @@ import {
   FETCH_PRODUCERS,
   NEW_MOVIE,
   NEW_ACTOR,
-  NEW_PRODUCER
+  NEW_PRODUCER,
+  FETCH_MOVIE,
+  UPDATE_MOVIE
 } from '../actions/types';
 
 const initialState = {
@@ -22,18 +24,21 @@ export default function (state = initialState, action) {
         movies: action.payload
       };
     case FETCH_ACTORS:
-      // console.log(state);
+      const updateStateActors = {
+        ...state
+      };
+      updateStateActors.message = '';
       return {
-        // ...state,
+        ...updateStateActors,
         actors: action.payload
       };
     case FETCH_PRODUCERS:
-      const updateState = {
+      const updateStateProducers = {
         ...state
       };
-      updateState.message = '';
+      updateStateProducers.message = '';
       return {
-        ...state,
+        ...updateStateProducers,
         producers: action.payload
       }
     case NEW_MOVIE:
@@ -47,6 +52,16 @@ export default function (state = initialState, action) {
         message: action.payload
       }
     case NEW_PRODUCER:
+      return {
+        // ...state,
+        message: action.payload
+      }
+    case FETCH_MOVIE:
+      return {
+        ...state,
+        movie: action.payload
+      }
+    case UPDATE_MOVIE:
       return {
         // ...state,
         message: action.payload

@@ -101,6 +101,7 @@ class Dropdownlist extends React.Component {
     const activeClass = isOpen ? "new-drop-down--is-open" : "";
     return (
       <button
+        type="button"
         className={`new-drop-down__button ${activeClass}`}
         onClick={this.toggleIsOpen}
       >

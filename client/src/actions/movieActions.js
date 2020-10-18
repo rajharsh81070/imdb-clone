@@ -4,7 +4,9 @@ import {
   FETCH_PRODUCERS,
   NEW_MOVIE,
   NEW_ACTOR,
-  NEW_PRODUCER
+  NEW_PRODUCER,
+  FETCH_MOVIE,
+  UPDATE_MOVIE
 } from './types';
 
 export const fetchMovies = () => dispatch => {
@@ -21,6 +23,45 @@ export const fetchMovies = () => dispatch => {
       dispatch({
         type: FETCH_MOVIES,
         payload: movies
+      })
+    });
+};
+
+export const fetchMovie = (id) => dispatch => {
+  const requestOptions = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  }
+  fetch('http://localhost:5000/movie/' + id, requestOptions)
+    .then(res => res.json())
+    .then(movie => {
+      // console.log(movie);
+      dispatch({
+        type: FETCH_MOVIE,
+        payload: movie
+      })
+    });
+};
+
+export const updateMovie = (id, putData) => dispatch => {
+  const requestOptions = {
+    method: 'PUT',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(putData)
+  }
+  fetch('http://localhost:5000/movie/' + id, requestOptions)
+    .then(res => res.json())
+    .then(message => {
+      // console.log(movie);
+      dispatch({
+        type: UPDATE_MOVIE,
+        payload: message
       })
     });
 };

@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { fetchActors, fetchProducers, addActor, addProducer, manageMovie } from "../actions/movieActions";
+import {
+  fetchActors,
+  fetchProducers,
+  addActor,
+  addProducer,
+  manageMovie,
+  fetchMovie,
+  updateMovie
+} from "../actions/movieActions";
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import ModalForm from './ModalForm';
@@ -35,6 +43,17 @@ class MovieForm extends Component {
   UNSAFE_componentWillMount() {
     this.props.fetchActors();
     this.props.fetchProducers();
+    if (this.props.match.params.id !== undefined) {
+      this.props.fetchMovie(this.props.match.params.id);
+    }
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.movie) {
+      this.setState({ movie_name: nextProps.movie.movie_name });
+      this.setState({ selected: nextProps.movie.actors.id });
+      this.setState({ producer_id: nextProps.movie.producer });
+    }
   }
 
   componentDidUpdate() {
@@ -42,7 +61,7 @@ class MovieForm extends Component {
       this.props.fetchActors();
       this.props.fetchProducers();
       toast.success(this.props.message.message);
-    } else if (this.props.message !== undefined && this.props.message.message === "Movie Successfully Created") {
+    } else if (this.props.message !== undefined && (this.props.message.message === "Movie Successfully Created" || this.props.message.message === "Successfully Updated")) {
       this.props.history.push('/movies');
       toast.success(this.props.message.message);
     }
@@ -70,10 +89,10 @@ class MovieForm extends Component {
     e.preventDefault();
 
     const { movie_name, producer_id, selected } = this.state;
-
+    console.log(movie_name.length, producer_id.length, selected.length);
     // console.log(this.state.selected);
     // console.log(this.props.actors);
-    if (movie_name.length > 0 && producer_id.length > 0 && selected.length > 0) {
+    if (movie_name.length > 0 && producer_id !== '' && selected.length > 0) {
       const movie = {
         movie_name: this.state.movie_name,
         producer_id: this.state.producer_id,
@@ -81,7 +100,11 @@ class MovieForm extends Component {
       };
       const updateError = {};
       this.setState({ error: updateError });
-      this.props.manageMovie(movie);
+      if (this.props.match.params.id !== undefined) {
+        this.props.updateMovie(this.props.match.params.id, movie);
+      } else {
+        this.props.manageMovie(movie);
+      }
     } else {
       const updateError = {
         movie_name: 'error',
@@ -90,9 +113,6 @@ class MovieForm extends Component {
       };
       this.setState({ error: updateError });
     }
-
-
-
     // // console.log(movie);
 
     // this.props.manageMovie(movie);
@@ -184,6 +204,8 @@ class MovieForm extends Component {
   render() {
     return (
       <div>
+        {/* {console.log(this.props.movie)} */}
+        {console.log(this.state)}
         <h2>Manage Movie</h2>
         <form onSubmit={this.onSubmit} >
           {/* {console.log(this.props.actors, this.props.producers)} */}
@@ -293,7 +315,7 @@ class MovieForm extends Component {
                 {
                   this.props.producers !== undefined ?
                     this.props.producers.map((producer, index) =>
-                      <option key={index} value={producer.producer_id}>
+                      <option key={index} selected={this.state.producer_id === producer.producer_id ? true : false} value={producer.producer_id}>
                         {producer.producer_name}
                       </option>
                     )
@@ -317,7 +339,8 @@ class MovieForm extends Component {
 const mapStateToProps = state => ({
   actors: state.data.actors,
   producers: state.data.producers,
-  message: state.data.message
+  message: state.data.message,
+  movie: state.data.movie
 });
 
 export default connect(
@@ -326,6 +349,8 @@ export default connect(
   addProducer,
   fetchActors,
   fetchProducers,
-  manageMovie
+  manageMovie,
+  fetchMovie,
+  updateMovie
 })
   (MovieForm);
