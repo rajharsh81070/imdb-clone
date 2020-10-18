@@ -1,60 +1,35 @@
 import React, { Component } from 'react';
-import Modal from 'react-bootstrap/Modal';
-import { fetchActors, fetchProducers, addActor, addProducer } from "../actions/movieActions";
+import { fetchActors, fetchProducers, addActor, addProducer, manageMovie } from "../actions/movieActions";
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
-
-function ModalForm(props) {
-  return (
-    <Modal
-      {...props}
-      size="sm"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">
-          {props.label}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <input
-          type="text"
-          name={props.name}
-          className="form-control"
-          onChange={props.onChange}
-          value={props.value}
-          placeholder={props.place}
-        />
-        {/* {console.log(props.showerror)} */}
-        {
-          props.showerror === 'true' ?
-            <p style={{ color: 'red' }}>Item is required!</p>
-            : null
-        }
-      </Modal.Body>
-      <Modal.Footer>
-        <button type="button" className="btn btn-danger" onClick={props.onHide}>Close</button>
-        <button type="submit" onClick={props.onSubmit} className="btn btn-outline-primary" >Save</button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
+import ModalForm from './ModalForm';
+import Dropdownlist from './Dropdownlist';
 
 class MovieForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
       actor_name: '',
-      show: false,
-      showerror: 'false',
-      producer_name: ''
+      actorShow: false,
+      producerShow: false,
+      showErrorInModal: 'false',
+      producer_name: '',
+      uniqueKey: "actor_id",
+      movie_name: '',
+      producer_id: '',
+      actors_id: [],
+      selected: [],
+      error: {}
     }
-    this.handleHide = this.handleHide.bind(this);
-    this.handleShow = this.handleShow.bind(this);
+    this.handleActorHide = this.handleActorHide.bind(this);
+    this.handleActorShow = this.handleActorShow.bind(this);
+    this.handleProducerHide = this.handleProducerHide.bind(this);
+    this.handleProducerShow = this.handleProducerShow.bind(this);
     this.handleOnChange = this.handleOnChange.bind(this);
     this.onActorSubmit = this.onActorSubmit.bind(this);
     this.onProducerSubmit = this.onProducerSubmit.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   UNSAFE_componentWillMount() {
@@ -67,21 +42,82 @@ class MovieForm extends Component {
       this.props.fetchActors();
       this.props.fetchProducers();
       toast.success(this.props.message.message);
+    } else if (this.props.message !== undefined && this.props.message.message === "Movie Successfully Created") {
+      this.props.history.push('/movies');
+      toast.success(this.props.message.message);
     }
   }
 
-  handleHide = () => {
-    this.setState({ show: false });
+  onChange(e) {
+    // // console.log(e);
+    // if (e.target.name === 'actors_id') {
+    //   console.log(e.target.selected);
+    //   // let options = e.target.options;
+    //   // let values = [];
+    //   // for (let i = 0, l = options.length; i < l; i++) {
+    //   //   if (options[i].selected) {
+    //   //     values.push(options[i].value);
+    //   //   }
+    //   // }
+    //   // this.setState({ [e.target.name]: values });
+    // } else {
+    this.setState({ [e.target.name]: e.target.value });
+    // }
+    // console.log(this.state);
   }
 
-  handleShow = () => {
-    this.setState({ show: true });
+  onSubmit(e) {
+    e.preventDefault();
+
+    const { movie_name, producer_id, selected } = this.state;
+
+    // console.log(this.state.selected);
+    // console.log(this.props.actors);
+    if (movie_name.length > 0 && producer_id.length > 0 && selected.length > 0) {
+      const movie = {
+        movie_name: this.state.movie_name,
+        producer_id: this.state.producer_id,
+        actors_id: this.state.selected
+      };
+      const updateError = {};
+      this.setState({ error: updateError });
+      this.props.manageMovie(movie);
+    } else {
+      const updateError = {
+        movie_name: 'error',
+        producer_id: 'error',
+        actors_id: 'error'
+      };
+      this.setState({ error: updateError });
+    }
+
+
+
+    // // console.log(movie);
+
+    // this.props.manageMovie(movie);
+    // this.props.history.push('/movies');
+  }
+  handleActorHide = () => {
+    this.setState({ actorShow: false });
+  }
+
+  handleActorShow = () => {
+    this.setState({ actorShow: true });
+  }
+
+  handleProducerHide = () => {
+    this.setState({ producerShow: false });
+  }
+
+  handleProducerShow = () => {
+    this.setState({ producerShow: true });
   }
 
   handleOnChange = (e) => {
-    this.setState({ showerror: 'false' });
+    this.setState({ showErrorInModal: 'false' });
     this.setState({ [e.target.name]: e.target.value });
-    // console.log(this.state);
+    console.log(this.state);
   }
 
   onActorSubmit = (e) => {
@@ -92,11 +128,11 @@ class MovieForm extends Component {
       };
       // console.log(e);
       this.props.addActor(actor);
-      this.setState({ show: false })
+      this.setState({ actorShow: false })
       this.setState({ actor_name: '' })
       // toast.success(this.props.message.message);
     } else {
-      this.setState({ showerror: 'true' });
+      this.setState({ showErrorInModal: 'true' });
       // console.log(this.state);
     }
   }
@@ -109,60 +145,97 @@ class MovieForm extends Component {
       };
       // console.log(e);
       this.props.addProducer(producer);
-      this.setState({ show: false })
+      this.setState({ producerShow: false })
       this.setState({ producer_name: '' })
       // toast.success(this.props.message.message);
     } else {
-      this.setState({ showerror: 'true' });
+      this.setState({ showErrorInModal: 'true' });
       // console.log(this.state);
     }
   }
 
+  toggleChangeListItem = uniqueKey => {
+    if (uniqueKey === "ALL") {
+      if (this.state.selected.length === this.props.actors.length) {
+        this.setState({
+          selected: []
+        });
+      } else {
+        const allUniqueKeys = this.props.actors.map(
+          item => item[this.state.uniqueKey]
+        );
+        this.setState({
+          selected: allUniqueKeys
+        });
+      }
+    } else {
+      let updatedSelected = [...this.state.selected];
+      if (updatedSelected.indexOf(uniqueKey) > -1) {
+        updatedSelected.splice(updatedSelected.indexOf(uniqueKey), 1);
+      } else {
+        updatedSelected.push(uniqueKey);
+      }
+      this.setState({
+        selected: updatedSelected
+      });
+    }
+  };
+
   render() {
     return (
-      <form onSubmit={this.props.onSubmit} >
-        {/* {console.log(this.props.actors, this.props.producers)} */}
-        < div >
-          <br />
-          <label htmlFor="movie_name">Movie Name</label>
-          <div className="field">
-            <input
-              type="text"
-              name="movie_name"
-              className="form-control"
-              onChange={this.props.onChange}
-              value={this.props.data.movie_name}
-              placeholder="Movie Name..."
-              required
-            />
-          </div>
-        </div>
-        <br />
-        <div className='page-header'>
-          <div className='btn-toolbar float-right'>
-            <div className='btn-group'>
-              <button className="btn btn-outline-primary" type="button" onClick={this.handleShow}>
-                Add Actor
-            </button>
-              <ModalForm
-                show={this.state.show}
-                showerror={this.state.showerror}
-                onHide={this.handleHide}
-                label="Add"
-                place="Name..."
-                name="actor_name"
-                onChange={this.handleOnChange}
-                onSubmit={this.onActorSubmit}
-                value={this.state.actor_name}
+      <div>
+        <h2>Manage Movie</h2>
+        <form onSubmit={this.onSubmit} >
+          {/* {console.log(this.props.actors, this.props.producers)} */}
+          < div >
+            <br />
+            <label htmlFor="movie_name">Movie Name</label>
+            <div className="field">
+              <input
+                type="text"
+                name="movie_name"
+                className="form-control"
+                onChange={this.onChange}
+                value={this.state.movie_name}
+                placeholder="Movie Name..."
+              // required
               />
+              {
+                this.state.error.movie_name !== undefined ?
+                  <p style={{ color: 'red' }}>Item is required!</p>
+                  : null
+              }
             </div>
           </div>
-          <label htmlFor="actors">Actors</label>
-        </div>
-        <br />
-        <div className="form-group">
-          <div className="field">
-            <select multiple={true} name="actors_id" className="form-control" required onChange={this.props.onChange}>
+          <br />
+          <div className='page-header'>
+            <div className='btn-toolbar float-right'>
+              <div className='btn-group'>
+                <button className="btn btn-outline-primary" type="button" onClick={this.handleActorShow}>
+                  Add Actor
+            </button>
+                {
+                  this.state.actorShow &&
+                  <ModalForm
+                    show={this.state.actorShow}
+                    showerror={this.state.showErrorInModal}
+                    onHide={this.handleActorHide}
+                    label="Add"
+                    place="Name..."
+                    name="actor_name"
+                    onChange={this.handleOnChange}
+                    onSubmit={this.onActorSubmit}
+                    value={this.state.actor_name}
+                  />
+                }
+              </div>
+            </div>
+            <label htmlFor="actors">Actors</label>
+          </div>
+          <br />
+          <div className="form-group">
+            <div className="field">
+              {/* <select multiple={true} name="actors_id" className="form-control" required onChange={this.props.onChange}>
               {
                 this.props.actors !== undefined ?
                   this.props.actors.map((actor, index) =>
@@ -172,51 +245,71 @@ class MovieForm extends Component {
                   )
                   : null
               }
-            </select>
-          </div>
-        </div>
-        <br />
-        <div className='page-header'>
-          <div className='btn-toolbar float-right'>
-            <div className='btn-group'>
-              <button className="btn btn-outline-primary" type="button" onClick={this.handleShow}>
-                Add Producer
-            </button>
-              <ModalForm
-                show={this.state.show}
-                showerror={this.state.showerror}
-                onHide={this.handleHide}
-                label="Add"
-                place="Name..."
-                name="producer_name"
-                onChange={this.handleOnChange}
-                onSubmit={this.onProducerSubmit}
-                value={this.state.producer_name}
+            </select> */}
+              <Dropdownlist
+                shouldHaveSelectAll={true}
+                uniqueKey={this.state.uniqueKey}
+                data={this.props.actors}
+                selected={this.state.selected}
+                toggleChangeListItem={this.toggleChangeListItem}
               />
-            </div>
-          </div>
-          <label htmlFor="producers">Producers</label>
-        </div>
-        <br />
-        <div className="form-group">
-          <div className="field">
-            <select name="producer_id" className="form-control" required onChange={this.props.onChange}>
-              <option value="">Select a producer</option>
               {
-                this.props.producers !== undefined ?
-                  this.props.producers.map((producer, index) =>
-                    <option key={index} value={producer.producer_id}>
-                      {producer.producer_name}
-                    </option>
-                  )
+                this.state.error.actors_id !== undefined ?
+                  <p style={{ color: 'red' }}>Item is required!</p>
                   : null
               }
-            </select>
+            </div>
           </div>
-        </div>
-
-        <input type="submit" value="Save" className="btn btn-primary" />
-      </form >
+          <br />
+          <div className='page-header'>
+            <div className='btn-toolbar float-right'>
+              <div className='btn-group'>
+                <button className="btn btn-outline-primary" type="button" onClick={this.handleProducerShow}>
+                  Add Producer
+            </button>
+                {
+                  this.state.producerShow &&
+                  <ModalForm
+                    show={this.state.producerShow}
+                    showerror={this.state.showErrorInModal}
+                    onHide={this.handleProducerHide}
+                    label="Add"
+                    place="Name..."
+                    name="producer_name"
+                    onChange={this.handleOnChange}
+                    onSubmit={this.onProducerSubmit}
+                    value={this.state.producer_name}
+                  />
+                }
+              </div>
+            </div>
+            <label htmlFor="producers">Producers</label>
+          </div>
+          <br />
+          <div className="form-group">
+            <div className="field">
+              <select name="producer_id" className="form-control" onChange={this.onChange}>
+                <option value="">Select a producer</option>
+                {
+                  this.props.producers !== undefined ?
+                    this.props.producers.map((producer, index) =>
+                      <option key={index} value={producer.producer_id}>
+                        {producer.producer_name}
+                      </option>
+                    )
+                    : null
+                }
+              </select>
+              {
+                this.state.error.producer_id !== undefined ?
+                  <p style={{ color: 'red' }}>Item is required!</p>
+                  : null
+              }
+            </div>
+          </div>
+          <input type="submit" value="Save" className="btn btn-primary" />
+        </form >
+      </div>
     )
   }
 }
@@ -233,5 +326,6 @@ export default connect(
   addProducer,
   fetchActors,
   fetchProducers,
+  manageMovie
 })
   (MovieForm);

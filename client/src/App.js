@@ -5,7 +5,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Movies from './components/Movies/Movies';
 import NotFound from './components/NotFound';
-import ManageMoviePage from './components/ManageMoviePage';
+import MovieForm from './components/MovieForm';
 import Actors from './components/Actors/Actors';
 import Producers from './components/Producers/Producers';
 import { ToastContainer } from 'react-toastify';
@@ -21,8 +21,8 @@ function App() {
         <Route path="/movies" exact component={Movies} />
         <Route path="/actors" exact component={Actors} />
         <Route path="/producers" exact component={Producers} />
-        <Route path="/movie/:id" component={ManageMoviePage} />
-        <Route path="/movie/" component={ManageMoviePage} />
+        <Route path="/movie/:id" component={MovieForm} />
+        <Route path="/movie/" component={MovieForm} />
         <Route component={NotFound} />
       </Switch>
     </div>

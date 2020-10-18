@@ -126,7 +126,9 @@ app.post("/addproducer", async (req, res) => {
   }
 });
 
-//get a todo
+//get a movie
+
+// select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) as actors from movie m join actor_movie ma on (m.movie_id = ma.movie_id) join actor a on (ma.actor_id = a.actor_id) join producer p on (m.producer_id =p.producer_id) WHERE m.movie_id = 7 GROUP BY m.movie_id;
 
 // app.get("/todos/:id", async (req, res) => {
 //   try {
@@ -148,7 +150,8 @@ app.post("/addproducer", async (req, res) => {
 //     const { id } = req.params;
 //     const { description } = req.body;
 //     const updateMovie = await pool.query(
-//       "UPDATE todo SET description = $1 WHERE todo_id = $2",
+// UPDATE movie SET movie_name = 'Taken 3', producer_id = 1 WHERE movie_id = 7;
+//       "UPDATE todo SET movie_name = $1, producer_id = $2 WHERE movie_id = $3",
 //       [description, id]
 //     );
 

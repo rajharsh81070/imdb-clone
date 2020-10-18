@@ -28,6 +28,10 @@ export default function (state = initialState, action) {
         actors: action.payload
       };
     case FETCH_PRODUCERS:
+      const updateState = {
+        ...state
+      };
+      updateState.message = '';
       return {
         ...state,
         producers: action.payload
