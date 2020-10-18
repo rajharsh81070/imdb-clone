@@ -130,36 +130,67 @@ app.post("/addproducer", async (req, res) => {
 
 // select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) as actors from movie m join actor_movie ma on (m.movie_id = ma.movie_id) join actor a on (ma.actor_id = a.actor_id) join producer p on (m.producer_id =p.producer_id) WHERE m.movie_id = 7 GROUP BY m.movie_id;
 
-// app.get("/todos/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1", [
-//       id
-//     ]);
+app.get("/movie/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movie = await pool.query(`
+    select m.movie_id as movie_id, m.movie_name, max(p.producer_id) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+    as actors from movie m 
+    join actor_movie ma on (m.movie_id = ma.movie_id) 
+    join actor a on (ma.actor_id = a.actor_id) 
+    join producer p on (m.producer_id =p.producer_id) 
+    WHERE m.movie_id = $1 GROUP BY m.movie_id`, [id]
+    );
 
-//     res.json(todo.rows[0]);
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// });
+    res.json(movie.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
 
 //update a movie
 
-// app.put("/todos/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { description } = req.body;
-//     const updateMovie = await pool.query(
-// UPDATE movie SET movie_name = 'Taken 3', producer_id = 1 WHERE movie_id = 7;
-//       "UPDATE todo SET movie_name = $1, producer_id = $2 WHERE movie_id = $3",
-//       [description, id]
-//     );
+app.put("/movie/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { movie_name, producer_id, actors_id } = req.body;
+    const tmp_actors_id = await pool.query(
+      "SELECT actor_id FROM actor_movie WHERE movie_id = $1",
+      [id]
+    );
+    const old_actors_id = [];
+    tmp_actors_id.rows.forEach((id) => old_actors_id.push(id.actor_id));
+    const new_actors_id = actors_id;
+    const delete_ids_from_actor_movie = old_actors_id.filter((id) => !new_actors_id.includes(id));
+    const add_ids_to_actor_movie = new_actors_id.filter((id) => !old_actors_id.includes(id));
+    // console.log(delete_ids_from_actor_movie);
+    // console.log(add_ids_to_actor_movie);
+    await delete_ids_from_actor_movie.forEach(actor_id => {
+      const newRelation = pool.query(
+        "DELETE FROM actor_movie WHERE actor_id = $1 AND movie_id = $2",
+        [actor_id, id]
+      )
+    });
+    await add_ids_to_actor_movie.forEach(actor_id => {
+      // console.log(actor_id);
+      const newRelation = pool.query(
+        "INSERT INTO actor_movie (actor_id, movie_id) VALUES($1, $2)",
+        [actor_id, id]
+      )
+    });
+    const updateMovie = await pool.query(
+      // UPDATE movie SET movie_name = 'Taken 3', producer_id = 1 WHERE movie_id = 7;
+      "UPDATE movie SET movie_name = $1, producer_id = $2 WHERE movie_id = $3",
+      [movie_name, producer_id, id]
+    );
 
-//     res.json("Todo was updated!");
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// });
+    res.json({
+      "message": "Successfully Updated"
+    });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
 
 //delete a todo
 
