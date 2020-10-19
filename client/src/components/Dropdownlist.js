@@ -92,7 +92,7 @@ class Dropdownlist extends React.Component {
       labelContent = "None Selected";
     } else if (data !== undefined && selected.length === data.length) {
       labelContent = "All Selected";
-    } else if (selected.length === 1) {
+    } else if (data !== undefined && selected.length === 1) {
       const selectedOne = data.find(item => item[uniqueKey] === selected[0]);
       labelContent = selectedOne.actor_name;
     } else {
@@ -128,7 +128,7 @@ class Dropdownlist extends React.Component {
     const getIsChecked = ({ listData, uniqueKey, selected }) => {
       let isChecked = false;
       if (listData[uniqueKey] === "ALL") {
-        if (selected.length === data.length) {
+        if (data !== undefined && selected.length === data.length) {
           isChecked = true;
         } else {
           isChecked = false;

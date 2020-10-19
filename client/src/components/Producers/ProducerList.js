@@ -1,10 +1,11 @@
 import React from 'react';
+import Table from 'react-bootstrap/Table';
 
 export default function ProducerList(props) {
   const { producers } = props;
   return (
     <div>
-      <table className="table">
+      <Table striped bordered hover variant="dark">
         <thead>
           <tr>
             <th>Producer Name</th>
@@ -14,25 +15,26 @@ export default function ProducerList(props) {
           </tr>
         </thead>
         <tbody>
-          {producers.map((producer, index) => {
-            return (
-              <tr key={index}>
-                {/* <td>
-                  <Link to={"/course/" + course.slug}>{course.title}</Link>
-                </td> */}
-                <td>{producer.producer_name}</td>
-                <td>Male</td>
-                <td>
-                  04/05/1998
-                </td>
-                <td>
-                  Good.
-                </td>
-              </tr>
-            );
-          })}
+          {
+            props.producers.length > 0 ?
+              producers.map((producer, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{producer.producer_name}</td>
+                    <td>{producer.producer_gender}</td>
+                    <td>
+                      {producer.producer_dob.split('T')[0]}
+                    </td>
+                    <td>
+                      {producer.producer_bio}
+                    </td>
+                  </tr>
+                );
+              })
+              : <h4>No Producers</h4>
+          }
         </tbody>
-      </table>
+      </Table>
     </div>
   )
 }

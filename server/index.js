@@ -15,7 +15,7 @@ app.get("/allmovies", async (req, res) => {
   try {
     const allMovie = await pool.query(
       `
-      select m.movie_id as movie_id, m.movie_name, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+      select m.movie_id as movie_id, m.movie_name, m.movie_plot as movie_plot, m.movie_poster as movie_poster, m.movie_yor as movie_yor, max(p.producer_name) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
       as actors from movie m
       join actor_movie ma on (m.movie_id = ma.movie_id) 
       join actor a on (ma.actor_id = a.actor_id) 
@@ -56,10 +56,10 @@ app.get("/allproducer", async (req, res) => {
 
 app.post("/addmovie", async (req, res) => {
   try {
-    const { movie_name, producer_id, actors_id } = req.body;
+    const { movie_name, producer_id, actors_id, movie_plot, movie_poster, movie_yor } = req.body;
     const newMovie = await pool.query(
-      "INSERT INTO movie (movie_name, producer_id) VALUES($1, $2) RETURNING *",
-      [movie_name, producer_id]
+      "INSERT INTO movie (movie_name, movie_plot, movie_poster, movie_yor, producer_id) VALUES($1, $2, $3, $4, $5) RETURNING *",
+      [movie_name, movie_plot, movie_poster, movie_yor, producer_id]
     );
     await actors_id.forEach(actor_id => {
       // console.log(actor_id);
@@ -94,10 +94,10 @@ app.post("/addmovie", async (req, res) => {
 
 app.post("/addactor", async (req, res) => {
   try {
-    const { actor_name } = req.body;
+    const { actor_name, actor_gender, actor_bio, actor_dob } = req.body;
     const newActor = await pool.query(
-      "INSERT INTO actor (actor_name) VALUES($1) RETURNING *",
-      [actor_name]
+      "INSERT INTO actor (actor_name, actor_gender, actor_bio, actor_dob) VALUES($1, $2, $3, $4)",
+      [actor_name, actor_gender, actor_bio, actor_dob]
     );
 
     res.json({
@@ -112,10 +112,10 @@ app.post("/addactor", async (req, res) => {
 
 app.post("/addproducer", async (req, res) => {
   try {
-    const { producer_name } = req.body;
+    const { producer_name, producer_gender, producer_bio, producer_dob } = req.body;
     const newProducer = await pool.query(
-      "INSERT INTO producer (producer_name) VALUES($1) RETURNING *",
-      [producer_name]
+      "INSERT INTO producer (producer_name, producer_gender, producer_bio, producer_dob) VALUES($1, $2, $3, $4)",
+      [producer_name, producer_gender, producer_bio, producer_dob]
     );
 
     res.json({
@@ -134,7 +134,7 @@ app.get("/movie/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const movie = await pool.query(`
-    select m.movie_id as movie_id, m.movie_name, max(p.producer_id) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
+    select m.movie_id as movie_id, m.movie_name as movie_name, m.movie_plot as movie_plot, m.movie_poster as movie_poster, m.movie_yor as movie_yor, max(p.producer_id) as producer, json_build_object('name', json_agg(a.actor_name), 'id', json_agg(a.actor_id)) 
     as actors from movie m 
     join actor_movie ma on (m.movie_id = ma.movie_id) 
     join actor a on (ma.actor_id = a.actor_id) 
@@ -153,7 +153,7 @@ app.get("/movie/:id", async (req, res) => {
 app.put("/movie/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { movie_name, producer_id, actors_id } = req.body;
+    const { movie_name, producer_id, actors_id, movie_plot, movie_poster, movie_yor } = req.body;
     const tmp_actors_id = await pool.query(
       "SELECT actor_id FROM actor_movie WHERE movie_id = $1",
       [id]
@@ -180,8 +180,8 @@ app.put("/movie/:id", async (req, res) => {
     });
     const updateMovie = await pool.query(
       // UPDATE movie SET movie_name = 'Taken 3', producer_id = 1 WHERE movie_id = 7;
-      "UPDATE movie SET movie_name = $1, producer_id = $2 WHERE movie_id = $3",
-      [movie_name, producer_id, id]
+      "UPDATE movie SET movie_name = $1, producer_id = $2, movie_plot = $4, movie_poster = $5, movie_yor = $6 WHERE movie_id = $3",
+      [movie_name, producer_id, id, movie_plot, movie_poster, movie_yor]
     );
 
     res.json({
@@ -191,20 +191,6 @@ app.put("/movie/:id", async (req, res) => {
     console.error(err.message);
   }
 });
-
-//delete a todo
-
-// app.delete("/todos/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [
-//       id
-//     ]);
-//     res.json("Todo was deleted!");
-//   } catch (err) {
-//     console.log(err.message);
-//   }
-// });
 
 app.listen(5000, () => {
   console.log("server has started on port 5000");

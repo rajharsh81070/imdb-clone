@@ -15,18 +15,44 @@ export default function ModalForm(props) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        <label>Name</label>
         <input
           type="text"
-          name={props.name}
+          name={props.name1}
           className="form-control"
           onChange={props.onChange}
-          value={props.value}
-          placeholder={props.place}
+          value={props.value1}
         />
-        {/* {console.log(props.showerror)} */}
+        <br />
+        <label>Gender</label>
+        <input
+          type="text"
+          name={props.name2}
+          className="form-control"
+          onChange={props.onChange}
+          value={props.value2}
+        />
+        <br />
+        <label>Bio</label>
+        <input
+          type="text"
+          name={props.name3}
+          className="form-control"
+          onChange={props.onChange}
+          value={props.value3}
+        />
+        <br />
+        <label>D.O.B</label>
+        <input
+          type="date"
+          name={props.name4}
+          className="form-control"
+          onChange={props.onChange}
+          value={props.value4}
+        />
         {
           props.showerror === 'true' ?
-            <p style={{ color: 'red' }}>Item is required!</p>
+            <p style={{ color: 'red' }}>All items are required!</p>
             : null
         }
       </Modal.Body>

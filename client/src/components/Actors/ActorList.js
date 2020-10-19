@@ -1,10 +1,11 @@
 import React from 'react';
+import Table from 'react-bootstrap/Table';
 
 export default function ActorList(props) {
   const { actors } = props;
   return (
     <div>
-      <table className="table">
+      <Table striped bordered hover variant="dark">
         <thead>
           <tr>
             <th>Actor Name</th>
@@ -14,25 +15,28 @@ export default function ActorList(props) {
           </tr>
         </thead>
         <tbody>
-          {actors.map((actor, index) => {
-            return (
-              <tr key={index}>
-                {/* <td>
+          {props.actors.length > 0 ?
+            actors.map((actor, index) => {
+              return (
+                <tr key={index}>
+                  {/* <td>
                   <Link to={"/course/" + course.slug}>{course.title}</Link>
                 </td> */}
-                <td>{actor.actor_name}</td>
-                <td>Male</td>
-                <td>
-                  04/05/1998
-                </td>
-                <td>
-                  Good.
-                </td>
-              </tr>
-            );
-          })}
+                  <td>{actor.actor_name}</td>
+                  <td>{actor.actor_gender}</td>
+                  <td>
+                    {actor.actor_dob.split('T')[0]}
+                  </td>
+                  <td>
+                    {actor.actor_bio}
+                  </td>
+                </tr>
+              );
+            })
+            : <h4>No Actors</h4>
+          }
         </tbody>
-      </table>
+      </Table>
     </div>
   )
 }
